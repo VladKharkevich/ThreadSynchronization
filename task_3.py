@@ -1,26 +1,27 @@
-from threading import Thread, Lock
+from concurrent.futures import ThreadPoolExecutor
+from threading import Lock
 
-a = 0
+
+class A:
+    a = 0
+
+
 mutex = Lock()
 
 
-def function(arg):
-    global a
+def function(arg, a):
     for _ in range(arg):
-        mutex.acquire()
-        a += 1
-        mutex.release()
+        with mutex:
+            a.a += 1
 
 
 def main():
-    threads = []
-    for i in range(5):
-        thread = Thread(target=function, args=(1000000,))
-        thread.start()
-        threads.append(thread)
-
-    [t.join() for t in threads]
-    print("----------------------", a)  # ???
+    count_of_workers = 5
+    a = A()
+    with ThreadPoolExecutor(max_workers=count_of_workers) as executor:
+        for _ in range(count_of_workers):
+            executor.submit(function, 1000000, a)
+    print("----------------------", a.a)  # ???
 
 
 main()

@@ -2,26 +2,26 @@ from concurrent.futures import ThreadPoolExecutor
 from threading import Lock
 
 
-class A:
-    a = 0
+class Counter:
+    calculated_value = 0
 
 
 mutex = Lock()
 
 
-def function(arg, a):
-    for _ in range(arg):
+def incrementor(number_of_increments, counter):
+    for _ in range(number_of_increments):
         with mutex:
-            a.a += 1
+            counter.calculated_value += 1
 
 
 def main():
     count_of_workers = 5
-    a = A()
+    counter = Counter()
     with ThreadPoolExecutor(max_workers=count_of_workers) as executor:
         for _ in range(count_of_workers):
-            executor.submit(function, 1000000, a)
-    print("----------------------", a.a)  # ???
+            executor.submit(incrementor, 1000000, counter)
+    print("----------------------", counter.calculated_value)  # ???
 
 
 main()
